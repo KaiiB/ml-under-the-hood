@@ -19,12 +19,13 @@ def pcaEllipse2D(eigvals, eigvecs, data, z=2.0):
     W = eigvecs[:, :2] 
 
     # Compute ellipse parameters
+    mean = np.mean(data, axis=0) # data mean
     width = 2 * z * np.sqrt(eigvals[0]/data.shape[0])  # major axis
     height = 2 * z * np.sqrt(eigvals[1]/data.shape[0]) # minor axis
 
     # Compute rotation angle (in degrees)
-    vx, vy = eigvecs[:, 0] # x and y components of the major axis
-    angle = np.degrees(np.arctan2(vy, vx)) # angle of major axis
-    mean = np.mean(data, axis=0) # data mean
+    u,v = W[:, 0], W[:, 1]
+    cosine = np.dot(u, v)/(np.linalg.norm(u)*np.linalg.norm(u))
+    angle = np.arccos(cosine)
 
     return mean, width, height

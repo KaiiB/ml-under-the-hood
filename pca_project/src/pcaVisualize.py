@@ -2,9 +2,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
+import plotly.express as px
 import plotly.graph_objects as go
 from ipywidgets import interact
-from src.dataBuilder import projection
+from src.dataBuilder import projection, standardize
 from src.dataVisualization import plotPoints, plotQuiver, plotEllipse, runPlotActions
 from src.dataVisualization import plotlyPoints, plotlyQuiver, plotlyEllipse, runPlotlyActions
 
@@ -212,3 +213,54 @@ def makePlotlySliderFunction(fig):
         return fig
 
     return sliderFunctionPlotly
+
+def plotDataOnPrincipalComps(eigvecs, data, title, hover_name, dim=2, plot_dict=None, hover_data_dict=None, make_standard=True):
+    
+    if make_standard:
+        data = standardize(data)
+
+    # Top 3 components
+    W = eigvecs[:, :3]
+    X = data.to_numpy()
+    X_pca = X @ W
+
+    column_dict = {
+        'PCA 1': X_pca[:, 0],
+        'PCA 2': X_pca[:, 1],
+        'PCA 3': X_pca[:, 2]
+        }  
+
+    if plot_dict is not None:
+         column_dict.update(plot_dict)
+
+    # Create DataFrame for visualization
+    pca_df = pd.DataFrame(column_dict)
+
+    if dim == 2:
+        # 2D scatter plot
+        fig = px.scatter(
+            pca_df,
+            x='PCA 1',
+            y='PCA 2',
+            hover_name=hover_name,       # main hover label
+            hover_data=hover_data_dict,  # extra data to show
+            title=title,
+            width=800,
+            height=700
+        )
+    if dim == 3:
+        # 3D scatter plot
+        fig = px.scatter_3d(
+            pca_df,
+            x='PCA 1',
+            y='PCA 2',
+            z='PCA 3',  
+            hover_name=hover_name,       # main hover label
+            hover_data=hover_data_dict,  # extra data to show
+            title=title,
+            width=800,
+            height=700
+        )
+
+    fig.update_traces(marker=dict(size=5, opacity=0.7))
+    fig.show()
