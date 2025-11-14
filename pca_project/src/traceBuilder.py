@@ -2,8 +2,8 @@
 import json
 import numpy as np
 import pandas as pd
-from src.dataBuilder import loadData, standardize
-from src.pcaCore import computePCA
+from src.dataBuilder import loadData, standardize, zPrune
+from src.pcaCore import computePCA, pcaEllipse2D
 from src.dataBuilder import generateGaussian
 
 def buildTracePCA(path, dtype='numpy', seed=None, save_path="trace_pca.json"):
@@ -94,7 +94,7 @@ def buildTracePCA(path, dtype='numpy', seed=None, save_path="trace_pca.json"):
     print(f"[✓] PCA trace saved to {save_path}")
     return trace
 
-def buildTraceNumpyGeneraton(seed=42,
+def buildTraceNumpyGeneration(seed=42,
                              num_sets=1,
                              num_points=100,
                              dim=2,
@@ -170,5 +170,84 @@ def buildTraceNumpyGeneraton(seed=42,
     with open(save_path, "w") as f:
         json.dump(trace, f, indent=2)
 
-    print(f"[✓] PCA trace saved to {save_path}")
+    print(f"[✓] Gaussian Data Generation trace saved to {save_path}")
+    return trace
+
+def buildTracePcaEllipse2D(eigvals,
+                           eigvecs,
+                           path,
+                           dtype,
+                           z=2.0,
+                           prune=False,
+                           save_path="2d_pca_ellipse.json"):
+    """
+    Builds a trace JSON for a random numpy array.
+
+    Parameters
+    ----------
+    eigvals : scalar
+        Eigenvalues of the covariance matrix of 'data'
+    eigvecss : scalar
+        Eigenvectors of the covariance matrix of 'data'
+    data : array-like
+        Data used for PCA
+    z : float (default 2)
+        Number of standard deviations along the principal component to draw
+    """
+
+    # ----------------------------
+    # Load and standardize data
+    # ----------------------------
+    data = loadData(path, dtype=dtype)
+
+    if prune:
+        data = zPrune(data)
+
+    data_std = standardize(data)
+    # ----------------------------
+    # Obtain 2D PCA Ellipse attributes
+    # ----------------------------
+    mean, width, height = pcaEllipse2D(eigvals,
+                                       eigvecs,
+                                       data_std,
+                                       z)
+        
+    # ----------------------------
+    # Params blocks
+    # ----------------------------
+    params = {
+        "eigvals": eigvals.tolist(),
+        "eigvecs": eigvecs.tolist(),
+        "path": path,
+        "dtype": dtype,
+        "z": z,
+        'prune': prune
+    }
+
+    params_full = {
+        "mean": mean.tolist(),
+        "width": width,
+        "height": height
+    }
+
+    # ----------------------------
+    # Final trace object
+    # ----------------------------
+    trace = {
+        "algo": "pcaEllipse2D",
+        "meta": {
+            "description": "Calculate 2D PCA Ellipse attributes",
+            "version": "0.1"
+        },
+        "params": params,
+        "params_full": params_full
+    }
+
+    # ----------------------------
+    # Save JSON
+    # ----------------------------
+    with open(save_path, "w") as f:
+        json.dump(trace, f, indent=2)
+
+    print(f"[✓] 2D PCA Ellipse Attribute Extraction trace saved to {save_path}")
     return trace
