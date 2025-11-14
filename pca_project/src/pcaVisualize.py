@@ -214,7 +214,13 @@ def makePlotlySliderFunction(fig):
 
     return sliderFunctionPlotly
 
-def plotDataOnPrincipalComps(eigvecs, data, title, hover_name, dim=2, plot_dict=None, hover_data_dict=None, make_standard=True):
+def plotDataOnPrincipalComps(eigvecs,
+                             data, title,
+                             hover_name,
+                             dim=2,
+                             plot_dict=None,
+                             hover_data_dict=None,
+                             make_standard=True):
     
     if make_standard:
         data = standardize(data)

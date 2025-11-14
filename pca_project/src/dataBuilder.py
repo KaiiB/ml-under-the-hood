@@ -22,10 +22,10 @@ def generateGaussian(num_sets=1, num_points=100, dim=2, seed=42, mean=None, cov=
     np.random.seed(seed)
 
     # Generate the datasets
-    all_data = [] 
+    all_data = np.array([])
     for i in range(num_sets):
         data = np.random.multivariate_normal(mean, cov, size=num_points)
-        all_data.append(data)
+        all_data = np.append(all_data, data)
 
     return all_data
 
