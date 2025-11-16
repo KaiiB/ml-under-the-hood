@@ -1,3 +1,4 @@
 # ml-under-the-hood
-Repository for the implementation of Principal Component Analysis. 
+# PCA Branch
+The Principal Component Branch for the Repository "ml-under-the-hood". 
 Part of the SKLearn Under the Hood project. 
